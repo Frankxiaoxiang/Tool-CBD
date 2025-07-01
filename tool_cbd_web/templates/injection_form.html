@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Injection Molding - Tool CBD</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 300px;
+            padding: 5px;
+        }
+
+        .submit-btn {
+            margin-top: 20px;
+            padding: 8px 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .section {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .results {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background-color: #f8f9fa;
+        }
+
+        h2 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 30px;
+        }
+
+        label {
+            display: block;
+            margin-top: 8px;
+            font-weight: bold;
+            font-size: 12px;
+            color: #34495e;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 12px;
+            box-sizing: border-box;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        .submit-btn {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .submit-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .section {
+            margin-top: 15px;
+            padding: 20px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .results {
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+        .basic-info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .basic-info-grid label {
+            margin-top: 0;
+        }
+
+        .design-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .design-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+        }
+
+        .hot-runner-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .hot-runner-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+        }
+
+        .tool-components-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .tool-component-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+        }
+
+        .molding-trial-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .molding-trial-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+        }
+
+        .module-pair {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1200px) {
+            .basic-info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tool-components-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+
+            .basic-info-grid,
+            .design-grid,
+            .hot-runner-grid,
+            .tool-components-grid,
+            .molding-trial-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .design-summary,
+            .hot-runner-summary,
+            .tool-component-summary,
+            .molding-trial-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        input[readonly] {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .summary-field {
+            background-color: #e3f2fd !important;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Injection Molding Tool CBD</h2>
+
+    <form method="POST">
+
+        <h2>1. Basic Info</h2>
+
+        <div class="basic-info-grid">
+            <div class="field-group">
+                <label for="tool_type">Tool Type:</label>
+                <select name="tool_type" id="tool_type" required>
+                    {% for type in tool_types %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="program_name">Program Name:</label>
+                <input type="text" name="program_name" id="program_name" required>
+            </div>
+            <div class="field-group">
+                <label for="part_name">Part Name:</label>
+                <input type="text" name="part_name" id="part_name" required>
+            </div>
+            <div class="field-group">
+                <label for="part_num">Part Number:</label>
+                <input type="text" name="part_num" id="part_num">
+            </div>
+            <div class="field-group">
+                <label for="part_version">Part Version:</label>
+                <input type="text" name="part_version" id="part_version">
+            </div>
+            <div class="field-group">
+                <label for="supplier_name">Supplier Name:</label>
+                <input type="text" name="supplier_name" id="supplier_name">
+            </div>
+            <div class="field-group">
+                <label for="quotation_date">Quotation Date:</label>
+                <input type="date" name="quotation_date" id="quotation_date">
+            </div>
+            <div class="field-group">
+                <label for="part_raw_material">Part Raw Material:</label>
+                <input type="text" name="part_raw_material" id="part_raw_material">
+            </div>
+            <div class="field-group">
+                <label for="resin_type">Resin Type:</label>
+                <input type="text" name="resin_type" id="resin_type">
+            </div>
+            <div class="field-group">
+                <label for="resin_manufacturer">Resin Manufacturer:</label>
+                <input type="text" name="resin_manufacturer" id="resin_manufacturer">
+            </div>
+            <div class="field-group">
+                <label for="resin_grade">Resin Grade:</label>
+                <input type="text" name="resin_grade" id="resin_grade">
+            </div>
+            <div class="field-group">
+                <label for="moldbase_l">Moldbase size(L)/cm:</label>
+                <input type="text" name="moldbase_l" id="moldbase_l">
+            </div>
+            <div class="field-group">
+                <label for="moldbase_w">Moldbase size(W)/cm:</label>
+                <input type="text" name="moldbase_w" id="moldbase_w">
+            </div>
+            <div class="field-group">
+                <label for="moldbase_h">Moldbase size(H)/cm:</label>
+                <input type="text" name="moldbase_h" id="moldbase_h">
+            </div>
+            <div class="field-group">
+                <label for="injection_system">Injection System:</label>
+                <select name="injection_system" id="injection_system">
+                    {% for type in injection_systems %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="mold_type">Mold Type:</label>
+                <select name="mold_type" id="mold_type">
+                    {% for type in mold_types %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="hot_runner_system">Hot Runner System:</label>
+                <select name="hot_runner_system" id="hot_runner_system">
+                    {% for type in hot_runner_systems %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="hot_runner_gate_type">Hot Runner Gate Type:</label>
+                <select name="hot_runner_gate_type" id="hot_runner_gate_type">
+                    {% for type in hot_runner_gate_types %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="cold_runner_system">Cold runner System:</label>
+                <select name="cold_runner_system" id="cold_runner_system">
+                    {% for type in cold_runner_systems %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="gate_type">Gate Type:</label>
+                <select name="gate_type" id="gate_type">
+                    {% for type in gate_types %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+
+        <h2>2. Design & Engineering</h2>
+
+        <div class="design-grid">
+            <details open>
+                <summary>CAE Cost</summary>
+                <div class="section">
+                    <label>CAE design Hrs:
+                        <input type="number" id="cae_design_hrs" onchange="updateDesignCost()">
+                    </label>
+                    <label>CAE Rate (RMB/Hrs):
+                        <input type="number" id="cae_rate" onchange="updateDesignCost()">
+                    </label>
+                    <label>CAE Cost:
+                        <input type="number" id="cae_cost" readonly>
+                    </label>
+                </div>
+            </details>
+
+            <details open>
+                <summary>Tool Design Cost</summary>
+                <div class="section">
+                    <label>Tool design Hrs:
+                        <input type="number" id="tool_design_hrs" onchange="updateDesignCost()">
+                    </label>
+                    <label>Tool design Rate (RMB/Hrs):
+                        <input type="number" id="tool_design_rate" onchange="updateDesignCost()">
+                    </label>
+                    <label>Tool Design Cost:
+                        <input type="number" id="tool_design_cost" readonly>
+                    </label>
+                </div>
+            </details>
+
+        </div>
+        <div class="design-summary">
+            <div><label>Total Design Cost (Sum):
+                    <input type="number" id="design_sum" readonly>
+                </label>
+                </label></div>
+            <div><label>Percentage of Tool Total Cost:
+                    <input type="text" id="design_percentage" readonly>
+                </label></div>
+        </div>
+
+        <script>
+            function updateDesignCost() {
+                const caeHrs = parseFloat(document.getElementById("cae_design_hrs").value || 0);
+                const caeRate = parseFloat(document.getElementById("cae_rate").value || 0);
+                const toolHrs = parseFloat(document.getElementById("tool_design_hrs").value || 0);
+                const toolRate = parseFloat(document.getElementById("tool_design_rate").value || 0);
+                const totalCostInput = document.querySelector('[name="tool_total_cost"]');
+                const toolTotalCost = parseFloat(totalCostInput?.value || 0);
+
+                const caeCost = caeHrs * caeRate;
+                const toolCost = toolHrs * toolRate;
+                const totalDesignCost = caeCost + toolCost;
+
+                document.getElementById("cae_cost").value = caeCost.toFixed(2);
+                document.getElementById("tool_design_cost").value = toolCost.toFixed(2);
+                document.getElementById("design_sum").value = totalDesignCost.toFixed(2);
+
+                if (toolTotalCost > 0) {
+                    const percentage = (totalDesignCost / toolTotalCost) * 100;
+                    document.getElementById("design_percentage").value = percentage.toFixed(2) + "%";
+                } else {
+                    document.getElementById("design_percentage").value = "";
+                }
+
+                // ✅ 手动触发总成本更新
+                if (typeof updateToolTotalCost === "function") {
+                    updateToolTotalCost();
+                }
+            }
+        </script>
+
+
+
+
+        <h2>3. Hot Runner</h2>
+        <div class="section">
+            <div class="hot-runner-grid">
+                <label>Supplier:
+                    <input type="text" name="hr_supplier">
+                </label>
+
+                <label>Hot Drop Qty:
+                    <input type="number" name="hr_qty" id="hr-qty" oninput="updateHotRunnerSumAndPercentage()">
+                </label>
+
+                <label>Hot Runner Gate Type:
+                    <select name="hr_gate_type">
+                        {% for gate_type in hot_runner_gate_types %}
+                        <option value="{{ gate_type }}">{{ gate_type }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+
+                <label>Drop Pitch (X)/mm:
+                    <input type="number" name="hr_pitch_x">
+                </label>
+
+                <label>Drop Pitch (Y)/mm:
+                    <input type="number" name="hr_pitch_y">
+                </label>
+
+                <label>HR Cost (元):
+                    <input type="number" name="hr_cost" id="hr-cost" step="0.01"
+                        oninput="updateHotRunnerSumAndPercentage()">
+                </label>
+            </div>
+        </div>
+
+        <div class="hot-runner-summary">
+            <label>HR Sum (RMB):
+                <input type="number" id="hot_runner_sum" name="hr_sum" class="summary-field" readonly>
+            </label>
+            <label>Percentage (%):
+                <input type="text" id="hr-percentage" name="hr_percentage" class="summary-field" readonly>
+            </label>
+        </div>
+
+
+        <script>
+            function updateHotRunnerSumAndPercentage() {
+                const hrCost = parseFloat(document.getElementById("hr-cost").value) || 0;
+                const toolTotalCostInput = document.getElementById("tool_total_cost");
+                const toolTotalCost = toolTotalCostInput ? parseFloat(toolTotalCostInput.value) || 0 : 0;
+
+                document.getElementById("hot_runner_sum").value = hrCost.toFixed(2);
+
+                if (toolTotalCost > 0) {
+                    const percentage = (hrCost / toolTotalCost) * 100;
+                    document.getElementById("hr-percentage").value = percentage.toFixed(2) + " %";
+                } else {
+                    document.getElementById("hr-percentage").value = "";
+                }
+
+                // 重新触发总成本计算
+                if (typeof calculateToolTotalCost === 'function') {
+                    calculateToolTotalCost();
+                }
+            }
+        </script>
+
+
+
+        <h2>4. Tool Component</h2>
+
+        <div id="tool-components" class="tool-components-grid">
+            {% for comp in ['Cavity', 'Core', 'Slider', 'Lifter', 'Insert', 'Others', 'Moldbase', 'Std components',
+            'Ejector components'] %}
+            <details open>
+                <summary><strong>{{ comp }}</strong></summary>
+                <div class="section">
+                    <label>Material:
+                        <input type="text" name="{{ comp | lower | replace(' ', '_') }}_material">
+                    </label>
+                    <label>Surface Treatment:
+                        <input type="text" name="{{ comp | lower | replace(' ', '_') }}_treatment">
+                    </label>
+                    <label>Qty/Set:
+                        <input type="number" step="1" name="{{ comp | lower | replace(' ', '_') }}_qty"
+                            onchange="updateToolComponentCost('{{ comp | lower | replace(' ', '_') }}')">
+                    </label>
+                    <label>Unit Cost (元):
+                        <input type="number" step="0.01" name="{{ comp | lower | replace(' ', '_') }}_unit_cost"
+                            onchange="updateToolComponentCost('{{ comp | lower | replace(' ', '_') }}')">
+                    </label>
+                    <label>Total Cost (元):
+                        <input type="number" name="{{ comp | lower | replace(' ', '_') }}_total_cost" readonly>
+                    </label>
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+
+        <div class="section">
+            <h3>Tool Component Summary</h3>
+            <label>Tool Component Sum (RMB):
+                <input type="number" id="tool_component_sum" name="tool_component_sum" readonly>
+            </label>
+            <label>Percentage (%):
+                <input type="text" id="tool_component_percentage" name="tool_component_percentage" readonly>
+            </label>
+        </div>
+        </div>
+
+        <script>
+            const toolComponentKeys = [
+                "cavity", "core", "slider", "lifter", "insert",
+                "others", "moldbase", "std_components", "ejector_components"
+            ];
+
+            function updateToolComponentCost(key) {
+                const qty = parseFloat(document.querySelector(`[name="${key}_qty"]`)?.value || 0);
+                const unitCost = parseFloat(document.querySelector(`[name="${key}_unit_cost"]`)?.value || 0);
+                const totalCost = qty * unitCost;
+                document.querySelector(`[name="${key}_total_cost"]`).value = totalCost.toFixed(2);
+
+                updateToolComponentSummary();
+            }
+
+            function updateToolComponentSummary() {
+                let sum = 0;
+                toolComponentKeys.forEach(key => {
+                    const total = parseFloat(document.querySelector(`[name="${key}_total_cost"]`)?.value || 0);
+                    sum += total;
+                });
+
+                document.getElementById("tool_component_sum").value = sum.toFixed(2);
+
+                const toolTotalCostInput = document.querySelector('[name="tool_total_cost"]');
+                const toolTotalCost = parseFloat(toolTotalCostInput?.value || 0);
+                const percentageField = document.getElementById("tool_component_percentage");
+
+                if (toolTotalCost > 0) {
+                    const ratio = (sum / toolTotalCost) * 100;
+                    percentageField.value = ratio.toFixed(2) + " %";
+                } else {
+                    percentageField.value = "";
+                }
+            }
+        </script>
+
+
+        <h2>5. Assembly & Fitting</h2>
+
+        <div class="section">
+            <label>Tool Maker Qty:
+                <input type="number" step="1" id="tool_maker_qty" name="tool_maker_qty" onchange="updateAssemblyCost()">
+            </label>
+            <label>Tool Assy Hrs:
+                <input type="number" step="0.1" id="tool_assy_hrs" name="tool_assy_hrs" onchange="updateAssemblyCost()">
+            </label>
+            <label>Assy Working Rate/hr (元):
+                <input type="number" step="0.01" id="assy_rate" name="assy_rate" onchange="updateAssemblyCost()">
+            </label>
+            <label>Assy Cost (元):
+                <input type="number" id="assy_cost" name="assy_cost" readonly>
+            </label>
+        </div>
+
+        <div class="section">
+            <h3>Assembly & Fitting Summary</h3>
+            <label>Assembly & Fitting Sum (元):
+                <input type="number" id="assembly_fitting_sum" name="assembly_fitting_sum" readonly>
+            </label>
+            <label>Percentage (%):
+                <input type="text" id="assy_percentage" name="assy_percentage" readonly>
+            </label>
+        </div>
+        </div>
+
+        <script>
+            function updateAssemblyCost() {
+                const qty = parseFloat(document.getElementById("tool_maker_qty").value || 0);
+                const hrs = parseFloat(document.getElementById("tool_assy_hrs").value || 0);
+                const rate = parseFloat(document.getElementById("assy_rate").value || 0);
+
+                const assyCost = qty * hrs * rate;
+                document.getElementById("assy_cost").value = assyCost.toFixed(2);
+                document.getElementById("assembly_fitting_sum").value = assyCost.toFixed(2);
+
+                const toolTotalCostInput = document.querySelector('[name="tool_total_cost"]');
+                const toolTotalCost = parseFloat(toolTotalCostInput?.value || 0);
+                const percentageField = document.getElementById("assy_percentage");
+
+                if (toolTotalCost > 0) {
+                    const ratio = (assyCost / toolTotalCost) * 100;
+                    percentageField.value = ratio.toFixed(2) + "%";
+                } else {
+                    percentageField.value = "";
+                }
+            }
+        </script>
+
+
+        <h2>6. Molding Trial</h2>
+
+        <div class="molding-trial-grid">
+            <!-- Labor Trial Section -->
+            <details open>
+                <summary><strong>Labor Trial</strong></summary>
+                <div class="section">
+                    <label>Trial Pers:
+                        <input type="number" step="1" id="trial_pers" name="trial_pers"
+                            onchange="updateMoldingTrialCost()">
+                    </label>
+                    <label>Trial Rate (RMB/Hrs):
+                        <input type="number" step="0.01" id="trial_rate" name="trial_rate"
+                            onchange="updateMoldingTrialCost()">
+                    </label>
+                    <label>Trial Hrs (Hrs):
+                        <input type="number" step="0.1" id="trial_hrs_labor" name="trial_hrs_labor"
+                            onchange="updateMoldingTrialCost()">
+                    </label>
+                    <label>Labor Trial Cost (RMB):
+                        <input type="number" id="labor_trial_cost" name="labor_trial_cost" readonly>
+                    </label>
+                </div>
+            </details>
+
+            <!-- Machine Trial Section -->
+            <details open>
+                <summary><strong>Machine Trial</strong></summary>
+                <div class="section">
+                    <label>Machines Used (Qty):
+                        <input type="number" step="1" id="machine_qty" name="machine_qty"
+                            onchange="updateMoldingTrialCost()">
+                    </label>
+                    <label>Machine Rate (RMB/Hrs):
+                        <input type="number" step="0.01" id="machine_rate" name="machine_rate"
+                            onchange="updateMoldingTrialCost()">
+                    </label>
+                    <label>Trial Hrs (Hrs):
+                        <input type="number" step="0.1" id="trial_hrs_machine" name="trial_hrs_machine"
+                            onchange="updateMoldingTrialCost()">
+                    </label>
+                    <label>Machine Trial Cost (RMB):
+                        <input type="number" id="machine_trial_cost" name="machine_trial_cost" readonly>
+                    </label>
+                </div>
+            </details>
+
+        </div>
+        <!-- Summary Section -->
+        <div class="molding-trial-summary">
+            <label>Molding Trial Sum (RMB):
+                <input type="number" id="molding_trial_sum" name="molding_trial_sum" readonly>
+            </label>
+            <label>Percentage (%):
+                <input type="text" id="molding_trial_percentage" name="molding_trial_percentage" readonly>
+            </label>
+        </div>
+        </div>
+
+        <script>
+            function updateMoldingTrialCost() {
+                // Labor Trial
+                const trialPers = parseFloat(document.getElementById("trial_pers").value || 0);
+                const trialRate = parseFloat(document.getElementById("trial_rate").value || 0);
+                const trialHrsLabor = parseFloat(document.getElementById("trial_hrs_labor").value || 0);
+                const laborTrialCost = trialPers * trialRate * trialHrsLabor;
+                document.getElementById("labor_trial_cost").value = laborTrialCost.toFixed(2);
+
+                // Machine Trial
+                const machineQty = parseFloat(document.getElementById("machine_qty").value || 0);
+                const machineRate = parseFloat(document.getElementById("machine_rate").value || 0);
+                const trialHrsMachine = parseFloat(document.getElementById("trial_hrs_machine").value || 0);
+                const machineTrialCost = machineQty * machineRate * trialHrsMachine;
+                document.getElementById("machine_trial_cost").value = machineTrialCost.toFixed(2);
+
+                // Sum and percentage
+                const totalMoldingTrial = laborTrialCost + machineTrialCost;
+                document.getElementById("molding_trial_sum").value = totalMoldingTrial.toFixed(2);
+
+                const toolTotalCostInput = document.querySelector('[name="tool_total_cost"]');
+                const toolTotalCost = parseFloat(toolTotalCostInput?.value || 0);
+                const percentageField = document.getElementById("molding_trial_percentage");
+
+                if (toolTotalCost > 0) {
+                    const percentage = (totalMoldingTrial / toolTotalCost) * 100;
+                    percentageField.value = percentage.toFixed(2) + "%";
+                } else {
+                    percentageField.value = "";
+                }
+            }
+        </script>
+
+
+        <div class="module-pair">
+            <div class="section">
+                <h2>7. Others</h2>
+                <label>Description:
+                    <input type="text" id="others_description" name="others_description">
+                </label>
+                <label>Cost (RMB):
+                    <input type="number" step="0.01" id="others_cost" name="others_cost" onchange="updateOthersCost()">
+                </label>
+                <label>Others Sum (RMB):
+                    <input type="number" id="others_sum" name="others_sum" readonly>
+                </label>
+                <label>Percentage (%):
+                    <input type="text" id="others_percentage" name="others_percentage" readonly>
+                </label>
+            </div>
+
+            <div class="section">
+                <h2>8. Profit</h2>
+                <label>Profit Cost (RMB):
+                    <input type="number" step="0.01" id="profit_cost" name="profit_cost"
+                        onchange="updateProfitFields()">
+                </label>
+                <label>Profit Sum (RMB):
+                    <input type="number" id="profit_sum" name="profit_sum" readonly>
+                </label>
+                <label>Percentage (%):
+                    <input type="text" id="profit_percentage" name="profit_percentage" readonly>
+                </label>
+            </div>
+        </div>
+
+        <script>
+            function updateOthersCost() {
+                const cost = parseFloat(document.getElementById("others_cost").value || 0);
+                document.getElementById("others_sum").value = cost.toFixed(2);
+
+                const toolTotalCostInput = document.querySelector('[name="tool_total_cost"]');
+                const toolTotalCost = parseFloat(toolTotalCostInput?.value || 0);
+                const percentageField = document.getElementById("others_percentage");
+
+                if (toolTotalCost > 0) {
+                    const percentage = (cost / toolTotalCost) * 100;
+                    percentageField.value = percentage.toFixed(2) + "%";
+                } else {
+                    percentageField.value = "";
+                }
+
+                if (typeof updateToolTotalCost === "function") {
+                    updateToolTotalCost();
+                }
+            }
+
+            function updateProfitFields() {
+                const profitCost = parseFloat(document.getElementById("profit_cost").value || 0);
+                const toolTotalCostInput = document.querySelector('[name="tool_total_cost"]');
+                const toolTotalCost = parseFloat(toolTotalCostInput?.value || 0);
+                const profitSumField = document.getElementById("profit_sum");
+                const percentageField = document.getElementById("profit_percentage");
+
+                profitSumField.value = profitCost.toFixed(2);
+
+                if (toolTotalCost > 0) {
+                    const percentage = (profitCost / toolTotalCost) * 100;
+                    percentageField.value = percentage.toFixed(2) + "%";
+                } else {
+                    percentageField.value = "";
+                }
+
+                if (typeof updateToolTotalCost === "function") {
+                    updateToolTotalCost();
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', updateProfitFields);
+        </script>
+
+
+        <h2>9. Tool Total Cost</h2>
+
+        <div class="section">
+            <label>Tool Total Cost (RMB):
+                <input type="number" id="tool_total_cost" name="tool_total_cost" readonly>
+            </label>
+        </div>
+        </div>
+
+        <script>
+
+
+            function updateAllPercentages() {
+                const toolTotalCost = parseFloat(document.getElementById("tool_total_cost").value || 0);
+                if (toolTotalCost <= 0) return;
+
+                const updatePercentage = (sumId, percentId) => {
+                    const sum = parseFloat(document.getElementById(sumId)?.value || 0);
+                    const percentField = document.getElementById(percentId);
+                    if (percentField) {
+                        const ratio = (sum / toolTotalCost) * 100;
+                        percentField.value = ratio.toFixed(2) + " %";
+                    }
+                };
+
+                updatePercentage("design_sum", "design_percentage");
+                updatePercentage("hot_runner_sum", "hr-percentage");
+                updatePercentage("tool_component_sum", "tool_component_percentage");
+                updatePercentage("assembly_fitting_sum", "assy_percentage");
+                updatePercentage("molding_trial_sum", "molding_trial_percentage");
+                updatePercentage("others_sum", "others_percentage");
+                updatePercentage("profit_sum", "profit_percentage");
+            }
+
+
+            function updateToolTotalCost() {
+                const fieldsToSum = [
+                    'design_sum',
+                    'hot_runner_sum',
+                    'tool_component_sum',
+                    'assembly_fitting_sum',
+                    'molding_trial_sum',
+                    'others_sum',
+                    'profit_sum'
+                ];
+
+                let total = 0;
+
+                fieldsToSum.forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input && input.value !== "") {
+                        const value = parseFloat(input.value);
+                        if (!isNaN(value)) {
+                            total += value;
+                        }
+                    }
+                });
+
+                const totalField = document.getElementById("tool_total_cost");
+                totalField.value = total.toFixed(2);
+
+                updateAllPercentages();
+
+                // ✅ 每次更新总成本后，主动刷新所有模块的百分比显示
+                if (typeof updateDesignCost === "function") updateDesignCost();
+                if (typeof updateHotRunnerSumAndPercentage === "function") updateHotRunnerSumAndPercentage();
+                if (typeof updateToolComponentSummary === "function") updateToolComponentSummary();
+                if (typeof updateAssemblyCost === "function") updateAssemblyCost();
+                if (typeof updateMoldingTrialCost === "function") updateMoldingTrialCost();
+                if (typeof updateOthersCost === "function") updateOthersCost();
+                if (typeof updateProfitFields === "function") updateProfitFields();
+            }
+
+
+            // 自动绑定监听输入字段变化
+            const sumFieldIds = [
+                'design_sum',
+                'hot_runner_sum',
+                'tool_component_sum',
+                'assembly_fitting_sum',
+                'molding_trial_sum',
+                'others_sum',
+                'profit_sum'
+            ];
+
+            sumFieldIds.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('input', updateToolTotalCost);
+                }
+            });
+
+            document.addEventListener('DOMContentLoaded', updateToolTotalCost);
+        </script>
+
+
+        <button type="submit" class="submit-btn">计算成本</button>
+    </form>
+
+    {% if result %}
+    <div class="results">
+        <h2>计算结果</h2>
+        <p><strong>CAE Cost:</strong> {{ result.cae_cost }}</p>
+        <p><strong>Tool Design Cost:</strong> {{ result.tool_cost }}</p>
+        <p><strong>Total Design Cost (CAE + Tool):</strong> {{ result.design_sum }}</p>
+        <p><strong>Design 成本占比:</strong> {{ result.design_ratio }}</p>
+        <p style="color: gray;"><em>* 注：总成本尚未汇总，暂无法计算占比</em></p>
+    </div>
+    {% endif %}
+
+</body>
+
+</html>
