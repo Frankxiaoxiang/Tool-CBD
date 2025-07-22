@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Injection Molding - Tool CBD</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <h2>Injection Molding Tool CBD</h2>
+
+    <!-- CSV Upload Section -->
+    <div class="csv-upload-section">
+        <h3>📁 Import CSV Data</h3>
+        <div class="upload-container">
+            <input type="file" id="csv-file-input" name="csv_file" accept=".csv" style="display: none;">
+            <button type="button" id="csv-upload-btn" class="upload-btn">选择CSV文件</button>
+            <span id="file-name" class="file-name"></span>
+            <button type="button" id="import-data-btn" class="import-btn" style="display: none;">导入数据</button>
+            <!-- Cost Comparison按钮，挨着上传控件 -->
+            <button type="button" id="compare-btn" class="submit-btn" style="margin-left:3cm;"
+                onclick="window.location.href='{{ url_for('compare') }}'">
+                Cost Comparison
+            </button>
+        </div>
+        <div id="upload-status" class="upload-status"></div>
+    </div>
+
+    <form method="POST">
+
+
+        <h2>1. Basic Info</h2>
+        <div class="basic-info-grid">
+            <div class="field-group">
+                <label for="tool_type">Tool Type:</label>
+                <select name="tool_type" id="tool_type" required>
+                    {% for type in tool_types %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="program_name">Program Name:</label>
+                <input type="text" name="program_name" id="program_name" required>
+            </div>
+            <div class="field-group">
+                <label for="part_name">Part Name:</label>
+                <input type="text" name="part_name" id="part_name" required>
+            </div>
+            <div class="field-group">
+                <label for="part_num">Part Number:</label>
+                <input type="text" name="part_num" id="part_num">
+            </div>
+            <div class="field-group">
+                <label for="part_version">Part Version:</label>
+                <input type="text" name="part_version" id="part_version">
+            </div>
+            <div class="field-group">
+                <label for="supplier_name">Supplier Name:</label>
+                <input type="text" name="supplier_name" id="supplier_name">
+            </div>
+            <div class="field-group">
+                <label for="quotation_date">Quotation Date:</label>
+                <input type="date" name="quotation_date" id="quotation_date">
+            </div>
+            <div class="field-group">
+                <label for="part_raw_material">Part Raw Material:</label>
+                <input type="text" name="part_raw_material" id="part_raw_material">
+            </div>
+            <div class="field-group">
+                <label for="resin_type">Resin Type:</label>
+                <input type="text" name="resin_type" id="resin_type">
+            </div>
+            <div class="field-group">
+                <label for="resin_manufacturer">Resin Manufacturer:</label>
+                <input type="text" name="resin_manufacturer" id="resin_manufacturer">
+            </div>
+            <div class="field-group">
+                <label for="resin_grade">Resin Grade:</label>
+                <input type="text" name="resin_grade" id="resin_grade">
+            </div>
+            <div class="field-group">
+                <label for="moldbase_l">Moldbase size(L)/cm:</label>
+                <input type="text" name="moldbase_l" id="moldbase_l">
+            </div>
+            <div class="field-group">
+                <label for="moldbase_w">Moldbase size(W)/cm:</label>
+                <input type="text" name="moldbase_w" id="moldbase_w">
+            </div>
+            <div class="field-group">
+                <label for="moldbase_h">Moldbase size(H)/cm:</label>
+                <input type="text" name="moldbase_h" id="moldbase_h">
+            </div>
+            <div class="field-group">
+                <label for="injection_system">Injection System:</label>
+                <select name="injection_system" id="injection_system">
+                    {% for type in injection_systems %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="mold_type">Mold Type:</label>
+                <select name="mold_type" id="mold_type">
+                    {% for type in mold_types %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="hot_runner_system">Hot Runner System:</label>
+                <select name="hot_runner_system" id="hot_runner_system">
+                    {% for type in hot_runner_systems %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="hot_runner_gate_type">Hot Runner Gate Type:</label>
+                <select name="hot_runner_gate_type" id="hot_runner_gate_type">
+                    {% for type in hot_runner_gate_types %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="cold_runner_system">Cold runner System:</label>
+                <select name="cold_runner_system" id="cold_runner_system">
+                    {% for type in cold_runner_systems %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="gate_type">Gate Type:</label>
+                <select name="gate_type" id="gate_type">
+                    {% for type in gate_types %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <h2>2. Design & Engineering</h2>
+        <div class="design-grid">
+            <details open>
+                <summary>CAE Cost</summary>
+                <div class="section">
+                    <label>CAE design Hrs:
+                        <input type="number" id="cae_design_hrs">
+                    </label>
+                    <label>CAE Rate (RMB/Hrs):
+                        <input type="number" id="cae_rate">
+                    </label>
+                    <label>CAE Cost:
+                        <input type="number" id="cae_cost" readonly>
+                    </label>
+                </div>
+            </details>
+            <details open>
+                <summary>Tool Design Cost</summary>
+                <div class="section">
+                    <label>Tool design Hrs:
+                        <input type="number" id="tool_design_hrs">
+                    </label>
+                    <label>Tool design Rate (RMB/Hrs):
+                        <input type="number" id="tool_design_rate">
+                    </label>
+                    <label>Tool Design Cost:
+                        <input type="number" id="tool_design_cost" readonly>
+                    </label>
+                </div>
+            </details>
+        </div>
+        <div class="design-summary">
+            <div>
+                <label>Total Design Cost (Sum):
+                    <input type="number" id="design_sum" readonly>
+                </label>
+            </div>
+            <div>
+                <label>Percentage of Tool Total Cost:
+                    <input type="text" id="design_percentage" readonly>
+                </label>
+            </div>
+        </div>
+
+        <h2>3. Hot Runner</h2>
+        <div class="section">
+            <div class="hot-runner-grid">
+                <label>Supplier:
+                    <input type="text" name="hr_supplier">
+                </label>
+                <label>Hot Drop Qty:
+                    <input type="number" name="hr_qty" id="hr-qty">
+                </label>
+                <label>Hot Runner Gate Type:
+                    <select name="hr_gate_type">
+                        {% for gate_type in hot_runner_gate_types %}
+                        <option value="{{ gate_type }}">{{ gate_type }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>Drop Pitch (X)/mm:
+                    <input type="number" name="hr_pitch_x">
+                </label>
+                <label>Drop Pitch (Y)/mm:
+                    <input type="number" name="hr_pitch_y">
+                </label>
+                <label>HR Cost (元):
+                    <input type="number" name="hr_cost" id="hr-cost" step="0.01">
+                </label>
+            </div>
+        </div>
+        <div class="hot-runner-summary">
+            <label>HR Sum (RMB):
+                <input type="number" id="hot_runner_sum" name="hr_sum" class="summary-field" readonly>
+            </label>
+            <label>Percentage (%):
+                <input type="text" id="hr-percentage" name="hr_percentage" class="summary-field" readonly>
+            </label>
+        </div>
+
+        <h2>4. Tool Component</h2>
+        <div id="tool-components" class="tool-components-grid">
+            {% for comp in ['Cavity', 'Core', 'Slider', 'Lifter', 'Insert', 'Others', 'Moldbase', 'Std components',
+            'Ejector components'] %}
+            <details open>
+                <summary><strong>{{ comp }}</strong></summary>
+                <div class="section">
+                    <label>Material:
+                        <input type="text" name="{{ comp | lower | replace(' ', '_') }}_material">
+                    </label>
+                    <label>Surface Treatment:
+                        <input type="text" name="{{ comp | lower | replace(' ', '_') }}_treatment">
+                    </label>
+                    <label>Qty/Set:
+                        <input type="number" step="1" name="{{ comp | lower | replace(' ', '_') }}_qty">
+                    </label>
+                    <label>Unit Cost (元):
+                        <input type="number" step="0.01" name="{{ comp | lower | replace(' ', '_') }}_unit_cost">
+                    </label>
+                    <label>Total Cost (元):
+                        <input type="number" name="{{ comp | lower | replace(' ', '_') }}_total_cost" readonly>
+                    </label>
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+        <div class="section">
+            <h3>Tool Component Summary</h3>
+            <label>Tool Component Sum (RMB):
+                <input type="number" id="tool_component_sum" name="tool_component_sum" readonly>
+            </label>
+            <label>Percentage (%):
+                <input type="text" id="tool_component_percentage" name="tool_component_percentage" readonly>
+            </label>
+        </div>
+
+        <h2>5. Assembly & Fitting</h2>
+        <div class="section">
+            <label>Tool Maker Qty:
+                <input type="number" step="1" id="tool_maker_qty" name="tool_maker_qty">
+            </label>
+            <label>Tool Assy Hrs:
+                <input type="number" step="0.1" id="tool_assy_hrs" name="tool_assy_hrs">
+            </label>
+            <label>Assy Working Rate/hr (元):
+                <input type="number" step="0.01" id="assy_rate" name="assy_rate">
+            </label>
+            <label>Assy Cost (元):
+                <input type="number" id="assy_cost" name="assy_cost" readonly>
+            </label>
+        </div>
+        <div class="section">
+            <h3>Assembly & Fitting Summary</h3>
+            <label>Assembly & Fitting Sum (元):
+                <input type="number" id="assembly_fitting_sum" name="assembly_fitting_sum" readonly>
+            </label>
+            <label>Percentage (%):
+                <input type="text" id="assy_percentage" name="assy_percentage" readonly>
+            </label>
+        </div>
+
+        <h2>6. Molding Trial</h2>
+        <div class="molding-trial-grid">
+            <details open>
+                <summary><strong>Labor Trial</strong></summary>
+                <div class="section">
+                    <label>Trial Pers:
+                        <input type="number" step="1" id="trial_pers" name="trial_pers">
+                    </label>
+                    <label>Trial Rate (RMB/Hrs):
+                        <input type="number" step="0.01" id="trial_rate" name="trial_rate">
+                    </label>
+                    <label>Trial Hrs (Hrs):
+                        <input type="number" step="0.1" id="trial_hrs_labor" name="trial_hrs_labor">
+                    </label>
+                    <label>Labor Trial Cost (RMB):
+                        <input type="number" id="labor_trial_cost" name="labor_trial_cost" readonly>
+                    </label>
+                </div>
+            </details>
+            <details open>
+                <summary><strong>Machine Trial</strong></summary>
+                <div class="section">
+                    <label>Machines Used (Qty):
+                        <input type="number" step="1" id="machine_qty" name="machine_qty">
+                    </label>
+                    <label>Machine Rate (RMB/Hrs):
+                        <input type="number" step="0.01" id="machine_rate" name="machine_rate">
+                    </label>
+                    <label>Trial Hrs (Hrs):
+                        <input type="number" step="0.1" id="trial_hrs_machine" name="trial_hrs_machine">
+                    </label>
+                    <label>Machine Trial Cost (RMB):
+                        <input type="number" id="machine_trial_cost" name="machine_trial_cost" readonly>
+                    </label>
+                </div>
+            </details>
+        </div>
+        <div class="molding-trial-summary">
+            <label>Molding Trial Sum (RMB):
+                <input type="number" id="molding_trial_sum" name="molding_trial_sum" readonly>
+            </label>
+            <label>Percentage (%):
+                <input type="text" id="molding_trial_percentage" name="molding_trial_percentage" readonly>
+            </label>
+        </div>
+
+        <div class="module-pair">
+            <div class="section">
+                <h2>7. Others</h2>
+                <label>Description:
+                    <input type="text" id="others_description" name="others_description">
+                </label>
+                <label>Cost (RMB):
+                    <input type="number" step="0.01" id="others_cost" name="others_cost">
+                </label>
+                <label>Others Sum (RMB):
+                    <input type="number" id="others_sum" name="others_sum" readonly>
+                </label>
+                <label>Percentage (%):
+                    <input type="text" id="others_percentage" name="others_percentage" readonly>
+                </label>
+            </div>
+            <div class="section">
+                <h2>8. Profit</h2>
+                <label>Profit Cost (RMB):
+                    <input type="number" step="0.01" id="profit_cost" name="profit_cost">
+                </label>
+                <label>Profit Sum (RMB):
+                    <input type="number" id="profit_sum" name="profit_sum" readonly>
+                </label>
+                <label>Percentage (%):
+                    <input type="text" id="profit_percentage" name="profit_percentage" readonly>
+                </label>
+            </div>
+        </div>
+
+        <h2>9. Tool Total Cost</h2>
+        <div class="section">
+            <label>Tool Total Cost (RMB):
+                <input type="number" id="tool_total_cost" name="tool_total_cost" readonly>
+            </label>
+        </div>
+
+        <button type="submit" class="submit-btn">Calculate Cost</button>
+        <button type="button" id="export-report" class="submit-btn"
+            style="background-color:#2ecc71;margin-left:20px;">Save Report</button>
+        <!-- === Save to DB ========================================= -->
+        <button type="button" id="saveBtn" class="submit-btn" style="background-color:#3498db;margin-left:20px;">
+            Save to Database
+        </button>
+    </form>
+
+    {% if result %}
+    <div class="results">
+        <h2>计算结果</h2>
+        <p><strong>CAE Cost:</strong> {{ result.cae_cost }}</p>
+        <p><strong>Tool Design Cost:</strong> {{ result.tool_cost }}</p>
+        <p><strong>Total Design Cost (CAE + Tool):</strong> {{ result.design_sum }}</p>
+        <p><strong>Design 成本占比:</strong> {{ result.design_ratio }}</p>
+        <p style="color: gray;"><em>* 注：总成本尚未汇总，暂无法计算占比</em></p>
+    </div>
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Tool Cost Database</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .selectors {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .selectors select {
+            min-width: 180px;
+            display: inline-block;
+            width: auto;
+            flex: 0 0 auto;
+        }
+
+        .record-box {
+            white-space: pre-wrap;
+            background: #fafafa;
+            padding: 1em;
+            border: 1px solid #ccc;
+        }
+
+        /* ── 详情只读区域（沿用 injection_form 网格风格） ── */
+        .record-details-section {
+            margin-top: 20px;
+        }
+
+        .record-details-section h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+
+        .record-details-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .record-details-grid .field-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .record-details-grid .field-group span {
+            margin-top: 4px;
+            background: #e3f2fd;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #34495e;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>🔍 Tool Cost Database</h2>
+
+    <div class="selectors" id="selectors"></div>
+
+    <button id="deleteBtn" style="display:none;background:#e74c3c;color:#fff;">Delete</button>
+    <button id="exportCSV" style="display:none;background:#2ecc71;color:#fff;margin-left:10px;">Export CSV</button>
+
+    <pre class="record-box" id="recordBox">Please select all six items…</pre>
+    <div id="recordDetails" style="display:none;"></div>
+
+<script>
+    const KEYS = ['tool_type', 'program_name', 'part_name', 'part_version', 'quotation_date', 'supplier_name'];
+
+    const selectorsDiv = document.getElementById('selectors');
+    const recordBox = document.getElementById('recordBox');
+    const deleteBtn = document.getElementById('deleteBtn');
+    const exportCSVBtn = document.getElementById('exportCSV');
+    const recordDetails = document.getElementById('recordDetails');
+
+    let currentId = null;
+
+    // ===== build selectors =====
+    function buildSelectors(opts) {
+        KEYS.forEach(k => {
+            const sel = document.createElement('select');
+            sel.id = k;
+            sel.innerHTML = '<option value="">' + k.replace('_', ' ').toUpperCase() + '</option>' +
+                opts[k].map(v => `<option value="${v}">${v}</option>`).join('');
+            sel.addEventListener('change', tryFetchRecord);
+            selectorsDiv.appendChild(sel);
+        });
+    }
+
+    // ===== render read‑only details grid 分模块+模块名 =====
+    function buildRecordDetails(obj) {
+        recordDetails.innerHTML = '';
+        const MODULES = [
+            { name: "1. Basic Info", fields: [
+                "tool_type", "program_name", "part_name", "part_num", "part_version",
+                "supplier_name", "quotation_date", "part_raw_material", "resin_type",
+                "resin_manufacturer", "resin_grade", "moldbase_l", "moldbase_w", "moldbase_h",
+                "injection_system", "mold_type", "hot_runner_system", "hot_runner_gate_type",
+                "cold_runner_system", "gate_type"
+            ] },
+            { name: "2. Design & Engineering", fields: [
+                "cae_design_hrs","cae_rate","cae_cost",
+                "tool_design_hrs","tool_design_rate","tool_design_cost",
+                "design_sum","design_percentage"
+            ] },
+            { name: "3. Hot Runner", fields: [
+                "hr_supplier","hr_qty","hr_gate_type","hr_pitch_x","hr_pitch_y","hr_cost",
+                "hr_sum","hr_percentage"
+            ] },
+            { name: "4. Tool Component", fields: [
+                "tool_component_sum","tool_component_percentage"
+                // 明细如需美化可扩展
+            ] },
+            { name: "5. Assembly & Fitting", fields: [
+                "tool_maker_qty","tool_assy_hrs","assy_rate","assy_cost",
+                "assembly_fitting_sum","assy_percentage"
+            ] },
+            { name: "6. Molding Trial", fields: [
+                "trial_pers","trial_rate","trial_hrs_labor","labor_trial_cost",
+                "machine_qty","machine_rate","trial_hrs_machine","machine_trial_cost",
+                "molding_trial_sum","molding_trial_percentage"
+            ] },
+            { name: "7. Others", fields: [
+                "others_description","others_cost","others_sum","others_percentage"
+            ] },
+            { name: "8. Profit", fields: [
+                "profit_cost","profit_sum","profit_percentage"
+            ] },
+            { name: "9. Tool Total Cost", fields: [
+                "tool_total_cost"
+            ] },
+        ];
+        // 字段美化
+        function labelize(k) {
+            return (FIELD_DISPLAY_NAME[k] || k.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()));
+        }
+        function mkField(label, val) {
+            const d = document.createElement('div');
+            d.className = 'field-group';
+            d.innerHTML = `<label>${label}</label><span>${val ?? ""}</span>`;
+            return d;
+        }
+        MODULES.forEach(mod => {
+            const section = document.createElement('div');
+            section.className = 'record-details-section';
+            section.innerHTML = `<h4>${mod.name}</h4>`;
+            const grid = document.createElement('div');
+            grid.className = 'record-details-grid';
+            mod.fields.forEach(k => {
+                if (obj[k] !== undefined)
+                    grid.appendChild(mkField(labelize(k), obj[k]));
+            });
+            section.appendChild(grid);
+            recordDetails.appendChild(section);
+        });
+        recordDetails.style.display = 'block';
+    }
+
+    // ===== fetch record when all chosen =====
+    async function tryFetchRecord() {
+        const params = KEYS.map(k => document.getElementById(k).value.trim());
+        if (params.some(v => !v)) return;  // wait until all chosen
+
+        const query = new URLSearchParams();
+        KEYS.forEach((k, i) => query.set(k, params[i]));
+
+        const res = await fetch('/api/tool_cost/record?' + query.toString());
+        const data = await res.json();
+
+        if (data.ok) {
+            currentId = data.record.id;
+            const obj = JSON.parse(data.record.data_json);
+
+            recordBox.textContent = JSON.stringify(obj, null, 2);  // 仍保留 JSON
+            recordBox.style.display = 'none';                        // 但默认隐藏
+
+            buildRecordDetails(obj); // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+            deleteBtn.style.display = 'inline-block';
+            exportCSVBtn.style.display = 'inline-block';
+        } else {
+            currentId = null;
+
+            recordBox.textContent = data.msg;
+            recordBox.style.display = 'block';
+
+            deleteBtn.style.display = 'none';
+            exportCSVBtn.style.display = 'none';
+            recordDetails.style.display = 'none';
+        }
+    }
+
+    // ===== delete record =====
+    deleteBtn.addEventListener('click', async () => {
+        if (!currentId) return;
+        if (!confirm('确定要删除该条记录吗?')) return;
+
+        const res = await fetch('/api/tool_cost/delete/' + currentId, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.ok) {
+            alert('删除成功');
+            location.reload();
+        } else alert('删除失败');
+    });
+
+    // ===== export current record as CSV =====
+    const FIELD_DISPLAY_NAME = {
+        // ...你的字段映射不变...
+        tool_type: "Tool Type",
+        program_name: "Program Name",
+        part_name: "Part Name",
+        part_num: "Part Number",
+        part_version: "Part Version",
+        supplier_name: "Supplier Name",
+        quotation_date: "Quotation Date",
+        part_raw_material: "Part Raw Material",
+        resin_type: "Resin Type",
+        resin_manufacturer: "Resin Manufacturer",
+        resin_grade: "Resin Grade",
+        moldbase_l: "Moldbase size(L)/cm",
+        moldbase_w: "Moldbase size(W)/cm",
+        moldbase_h: "Moldbase size(H)/cm",
+        injection_system: "Injection System",
+        mold_type: "Mold Type",
+        hot_runner_system: "Hot Runner System",
+        hot_runner_gate_type: "Hot Runner Gate Type",
+        cold_runner_system: "Cold runner System",
+        gate_type: "Gate Type",
+        // ...后面字段同你原内容，不动...
+        cae_design_hrs: "CAE design Hrs",
+        cae_rate: "CAE Rate (RMB/Hrs)",
+        cae_cost: "CAE Cost",
+        tool_design_hrs: "Tool design Hrs",
+        tool_design_rate: "Tool design Rate (RMB/Hrs)",
+        tool_design_cost: "Tool Design Cost",
+        design_sum: "Total Design Cost (Sum)",
+        design_percentage: "Percentage of Tool Total Cost",
+        hr_supplier: "Supplier",
+        hr_qty: "Hot Drop Qty",
+        hr_gate_type: "Hot Runner Gate Type",
+        hr_pitch_x: "Drop Pitch (X)/mm",
+        hr_pitch_y: "Drop Pitch (Y)/mm",
+        hr_cost: "HR Cost (RMB)",
+        hr_sum: "HR Sum (RMB)",
+        hr_percentage: "Percentage (%)",
+        tool_component_sum: "Tool Component Sum (RMB)",
+        tool_component_percentage: "Percentage (%)",
+        cavity_material: "Cavity Material",
+        cavity_treatment: "Cavity Treatment",
+        cavity_qty: "Cavity Qty/Set",
+        cavity_unit_cost: "Cavity Unit Cost(RMB)",
+        cavity_total_cost: "Cavity Total Cost(RMB)",
+        core_material: "Core Material",
+        core_treatment: "Core Treatment",
+        core_qty: "Core Qty/Set",
+        core_unit_cost: "Core Unit Cost(RMB)",
+        core_total_cost: "Core Total Cost(RMB)",
+        slider_material: "Slider Material",
+        slider_treatment: "Slider Treatment",
+        slider_qty: "Slider Qty/Set",
+        slider_unit_cost: "Slider Unit Cost(RMB)",
+        slider_total_cost: "Slider Total Cost(RMB)",
+        lifter_material: "Lifter Material",
+        lifter_treatment: "Lifter Treatment",
+        lifter_qty: "Lifter Qty/Set",
+        lifter_unit_cost: "Lifter Unit Cost(RMB)",
+        lifter_total_cost: "Lifter Total Cost(RMB)",
+        insert_material: "Insert Material",
+        insert_treatment: "Insert Treatment",
+        insert_qty: "Insert Qty/Set",
+        insert_unit_cost: "Insert Unit Cost(RMB)",
+        insert_total_cost: "Insert Total Cost(RMB)",
+        others_material: "Others Material",
+        others_treatment: "Others Treatment",
+        others_qty: "Others Qty/Set",
+        others_unit_cost: "Others Unit Cost(RMB)",
+        others_total_cost: "Others Total Cost(RMB)",
+        moldbase_material: "Moldbase Material",
+        moldbase_treatment: "Moldbase Treatment",
+        moldbase_qty: "Moldbase Qty/Set",
+        moldbase_unit_cost: "Moldbase Unit Cost(RMB)",
+        moldbase_total_cost: "Moldbase Total Cost(RMB)",
+        std_components_material: "Std Components Material",
+        std_components_treatment: "Std Components Treatment",
+        std_components_qty: "Std Components Qty/Set",
+        std_components_unit_cost: "Std Components Unit Cost(RMB)",
+        std_components_total_cost: "Std Components Total Cost(RMB)",
+        ejector_components_material: "Ejector Components Material",
+        ejector_components_treatment: "Ejector Components Treatment",
+        ejector_components_qty: "Ejector Components Qty/Set",
+        ejector_components_unit_cost: "Ejector Components Unit Cost(RMB)",
+        ejector_components_total_cost: "Ejector Components Total Cost(RMB)",
+        tool_maker_qty: "Tool Maker Qty",
+        tool_assy_hrs: "Tool Assy Hrs",
+        assy_rate: "Assy Working Rate/hr (RMB)",
+        assy_cost: "Assy Cost (RMB)",
+        assembly_fitting_sum: "Assembly & Fitting Sum (RMB)",
+        assy_percentage: "Percentage (%)",
+        trial_pers: "Labor: Trial Pers",
+        trial_rate: "Labor: Trial Rate (RMB/Hrs)",
+        trial_hrs_labor: "Labor: Trial Hrs",
+        labor_trial_cost: "Labor Trial Cost (RMB)",
+        machine_qty: "Machine: Machines Used",
+        machine_rate: "Machine: Machine Rate (RMB/Hrs)",
+        trial_hrs_machine: "Machine: Trial Hrs",
+        machine_trial_cost: "Machine Trial Cost (RMB)",
+        molding_trial_sum: "Molding Trial Sum (RMB)",
+        molding_trial_percentage: "Percentage (%)",
+        others_description: "Description",
+        others_cost: "Cost (RMB)",
+        others_sum: "Others Sum (RMB)",
+        others_percentage: "Percentage (%)",
+        profit_cost: "Profit Cost (RMB)",
+        profit_sum: "Profit Sum (RMB)",
+        profit_percentage: "Percentage (%)",
+        tool_total_cost: "Tool Total Cost (RMB)"
+    };
+
+    function escapeCSV(val) {
+        if (typeof val !== "string") val = (val == null ? "" : String(val));
+        if (val.indexOf(",") > -1 || val.indexOf('"') > -1 || val.indexOf("\n") > -1) {
+            val = '"' + val.replace(/"/g, '""') + '"';
+        }
+        return val;
+    }
+
+    function exportCurrentRecord() {
+        if (!currentId) return;
+        const obj = JSON.parse(recordBox.textContent || '{}');
+
+        // Tool Component 明细
+        const componentNames = [
+            "Cavity", "Core", "Slider", "Lifter", "Insert",
+            "Others", "Moldbase", "Std components", "Ejector components"
+        ];
+        const componentKeys = [
+            "cavity", "core", "slider", "lifter", "insert",
+            "others", "moldbase", "std_components", "ejector_components"
+        ];
+        const compFields = [
+            ["Material", "material"],
+            ["Treatment", "treatment"],
+            ["Qty/Set", "qty"],
+            ["Unit Cost(RMB)", "unit_cost"],
+            ["Total Cost(RMB)", "total_cost"]
+        ];
+
+        const modules = [
+            {
+                name: "1. Basic Info",
+                fields: [
+                    "tool_type", "program_name", "part_name", "part_num", "part_version",
+                    "supplier_name", "quotation_date", "part_raw_material", "resin_type",
+                    "resin_manufacturer", "resin_grade", "moldbase_l", "moldbase_w",
+                    "moldbase_h", "injection_system", "mold_type",
+                    "hot_runner_system", "hot_runner_gate_type", "cold_runner_system", "gate_type"
+                ]
+            },
+            {
+                name: "2. Design & Engineering",
+                fields: [
+                    "cae_design_hrs", "cae_rate", "cae_cost",
+                    "tool_design_hrs", "tool_design_rate", "tool_design_cost",
+                    "design_sum", "design_percentage"
+                ]
+            },
+            {
+                name: "3. Hot Runner",
+                fields: [
+                    "hr_supplier", "hr_qty", "hr_gate_type",
+                    "hr_pitch_x", "hr_pitch_y",
+                    "hr_cost",
+                    "hr_sum",
+                    "hr_percentage"
+                ]
+            },
+            {
+                name: "4. Tool Component",
+                fields: [
+                    "tool_component_sum", "tool_component_percentage"
+                ],
+                tableHeader: ["", ...compFields.map(f => f[0])],
+                table: componentKeys.map((key, idx) =>
+                    [
+                        componentNames[idx],
+                        ...compFields.map(f => obj[`${key}_${f[1]}`] ?? "")
+                    ]
+                )
+            },
+            {
+                name: "5. Assembly & Fitting",
+                fields: [
+                    "tool_maker_qty", "tool_assy_hrs", "assy_rate",
+                    "assy_cost", "assembly_fitting_sum", "assy_percentage"
+                ]
+            },
+            {
+                name: "6. Molding Trial",
+                fields: [
+                    "trial_pers", "trial_rate", "trial_hrs_labor", "labor_trial_cost",
+                    "machine_qty", "machine_rate", "trial_hrs_machine", "machine_trial_cost",
+                    "molding_trial_sum", "molding_trial_percentage"
+                ]
+            },
+            {
+                name: "7. Others",
+                fields: [
+                    "others_description", "others_cost", "others_sum", "others_percentage"
+                ]
+            },
+            {
+                name: "8. Profit",
+                fields: [
+                    "profit_cost", "profit_sum", "profit_percentage"
+                ]
+            },
+            {
+                name: "9. Tool Total Cost",
+                fields: [
+                    "tool_total_cost"
+                ]
+            }
+        ];
+
+        let lines = [];
+        for (const mod of modules) {
+            lines.push('');
+            lines.push('# ' + mod.name);
+            if (mod.fields) {
+                for (const key of mod.fields) {
+                    if (obj.hasOwnProperty(key)) {
+                        const displayName = FIELD_DISPLAY_NAME[key] || key.replace(/_/g, ' ');
+                        lines.push(escapeCSV(displayName) + ',' + escapeCSV(obj[key] ?? ""));
+                    }
+                }
+            }
+            // Tool Component明细
+            if (mod.name === "4. Tool Component" && mod.tableHeader && mod.table) {
+                lines.push([
+                    "",
+                    ...compFields.map(f => f[0])
+                ].map(escapeCSV).join(','));
+                for (let i = 0; i < componentKeys.length; i++) {
+                    const row = [
+                        componentNames[i],
+                        ...compFields.map(f => {
+                            const k = componentKeys[i] + '_' + f[1];
+                            return obj[k] ?? "";
+                        })
+                    ];
+                    lines.push(row.map(escapeCSV).join(','));
+                }
+            }
+        }
+        const csvContent = lines.join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        let filename = prompt('请输入导出的CSV文件名（不需要扩展名）：', 'tool_cost_record_' + currentId);
+        if (!filename) return;
+        filename = filename.replace(/[\\/:"*?<>|]+/g, '').trim();
+        if (!filename) {
+            alert('文件名不合法！');
+            return;
+        }
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename + '.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+    exportCSVBtn.addEventListener('click', exportCurrentRecord);
+
+    // ===== init selectors =====
+    fetch('/api/tool_cost/options')
+        .then(r => r.json())
+        .then(buildSelectors)
+        .catch(err => recordBox.textContent = '加载选项失败: ' + err);
+</script>
