@@ -1,2 +1,2 @@
 # Tool-CBD
-This is one web-based tool to colect tool cost bread down data and analyze
+This web-based tool is ussed to collect, store, compare and analyze the tool cost data from different suppliers. 
